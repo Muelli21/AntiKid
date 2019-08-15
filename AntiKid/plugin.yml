@@ -1,0 +1,12 @@
+authors: [Muelli]
+name: Antikid
+main: me.Antikid.main.Main
+version: 1.0
+depend: [ProtocolLib]
+commands:
+     check:
+     ban:
+     tempban:
+     unban:
+     debug:
+     asettings:
