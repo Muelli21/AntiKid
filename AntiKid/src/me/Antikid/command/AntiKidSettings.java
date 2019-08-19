@@ -5,8 +5,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import me.Antikid.AntikidData;
 import me.Antikid.gui.ModulesGui;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
 
 public class AntiKidSettings implements CommandExecutor {
@@ -17,8 +17,8 @@ public class AntiKidSettings implements CommandExecutor {
 	if (!sender.hasPermission("Admin")) { return false; }
 
 	if (args.length == 0) {
-	    Player p = (Player) sender;
 	    if (sender instanceof Player) {
+		Player p = (Player) sender;
 		new ModulesGui(p);
 		return false;
 	    }
@@ -27,8 +27,8 @@ public class AntiKidSettings implements CommandExecutor {
 	if (args.length == 1) {
 	    if (args[0].equals("autoban")) {
 
-		Main.toggleBan();
-		if (Main.ban) {
+		AntikidData.getData().toggleBan();
+		if (AntikidData.getData().isBanning()) {
 		    sender.sendMessage("§c------------------");
 		    sender.sendMessage("§6Bans are now §cdisabled!");
 		    sender.sendMessage("§c------------------");

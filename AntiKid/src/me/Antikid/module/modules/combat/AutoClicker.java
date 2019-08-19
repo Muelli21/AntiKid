@@ -6,16 +6,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
-import me.Antikid.types.Lag;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.ServerUtils;
 
 public class AutoClicker extends Module implements Listener {
 
     public AutoClicker() {
-	super("Autoclicker", new ItemBuilder(Material.IRON_SWORD).build());
+	super("Autoclicker", new ItemBuilder(Material.IRON_SWORD).build(), 5, 10, 15, false, BanReason.AUTOCLICKER);
 
     }
 
@@ -24,11 +24,11 @@ public class AutoClicker extends Module implements Listener {
 	if (!isEnabled())
 	    return;
 
-	if (Lag.getTPS() < 19.5) { return; }
+	if (ServerUtils.getTps() < 19.5) { return; }
 
 	if (e.getAction().toString().contains("LEFT")) {
 	    Player p = e.getPlayer();
-	    PlayerData pd = Main.getPlayerData(p);
+	    PlayerData pd = PlayerData.getPlayerData(p);
 	    pd.addClicks();
 	}
     }

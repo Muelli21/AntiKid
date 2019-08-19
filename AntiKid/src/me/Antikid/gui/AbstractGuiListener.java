@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import me.Antikid.main.Main;
+import me.Antikid.Antikid;
 import me.Antikid.types.PlayerData;
 
 public class AbstractGuiListener implements Listener {
@@ -19,7 +19,7 @@ public class AbstractGuiListener implements Listener {
 	Inventory inv = event.getClickedInventory();
 	int slot = event.getSlot();
 	Player player = (Player) event.getWhoClicked();
-	PlayerData pd = Main.getPlayerData(player);
+	PlayerData pd = PlayerData.getPlayerData(player);
 	AbstractGui gui = AbstractGui.Guis.get(inv);
 
 	if (gui == null) { return; }
@@ -56,7 +56,7 @@ public class AbstractGuiListener implements Listener {
 		    }
 		    return;
 		}
-	    }.runTaskLater(Main.getPlugin(), 1);
+	    }.runTaskLater(Antikid.getPlugin(), 1);
 	    return;
 	}
 

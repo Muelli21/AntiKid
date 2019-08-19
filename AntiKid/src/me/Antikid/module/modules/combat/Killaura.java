@@ -10,19 +10,20 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.FakeEntity;
-import me.Antikid.types.ItemBuilder;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.MathUtils;
+import me.Antikid.utils.ServerUtils;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
 
 public class Killaura extends Module implements Listener {
 
     public Killaura() {
-	super("Killaura", new ItemBuilder(Material.DIAMOND_SWORD).build());
+	super("Killaura", new ItemBuilder(Material.DIAMOND_SWORD).build(), 1, 3, 5, false, BanReason.KILLAURA);
     }
 
     @EventHandler
@@ -32,14 +33,14 @@ public class Killaura extends Module implements Listener {
 	if (!(e.getDamager() instanceof Player)) { return; }
 
 	Player p = (Player) e.getDamager();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
 	if (pd.getFakeplayer() != null) {
 	    pd.getFakeplayer().setRemovetime(10 * 1000);
 	    return;
 	}
 
-	Player random = Utils.getRandomPlayer(p);
+	Player random = ServerUtils.getRandomPlayer(p);
 	CraftPlayer crandom = (CraftPlayer) random;
 	EntityPlayer erandom = (EntityPlayer) crandom.getHandle();
 	GameProfile profile = erandom.getProfile();
@@ -48,7 +49,7 @@ public class Killaura extends Module implements Listener {
 	spawnloc.add(0, p.getEyeHeight() * 1.2, 0);
 	spawnloc.setPitch(0);
 	Vector mod = spawnloc.getDirection();
-	spawnloc.subtract(Utils.rotate(mod, 100).multiply(2.3));
+	spawnloc.subtract(MathUtils.rotate(mod, 100).multiply(2.3));
 	FakeEntity fakeplayer = new FakeEntity(p, profile, spawnloc);
 
 	fakeplayer.setRemovetime(10 * 1000);
@@ -66,7 +67,7 @@ public class Killaura extends Module implements Listener {
     public void onMove(PlayerMoveEvent e) {
 
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	FakeEntity fakeplayer = pd.getFakeplayer();
 	Location loc = e.getFrom();
 
@@ -83,7 +84,7 @@ public class Killaura extends Module implements Listener {
 	loc.add(0, p.getEyeHeight() * 1.2, 0);
 	loc.setPitch(0);
 	Vector mod = loc.getDirection();
-	loc.subtract(Utils.rotate(mod, 100).multiply(2.3));
+	loc.subtract(MathUtils.rotate(mod, 100).multiply(2.3));
 
 	fakeplayer.move(p.getLocation().getYaw(), p.getLocation().getPitch(), true, loc, false);
 	fakeplayer.swingArm();

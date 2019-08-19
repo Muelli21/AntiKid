@@ -9,59 +9,58 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.MathUtils;
+import me.Antikid.utils.PlayerUtils;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
 
 public class Fly extends Module implements Listener {
 
     public Fly() {
-	super("Fly", new ItemBuilder(Material.FEATHER).build());
+	super("Fly", new ItemBuilder(Material.FEATHER).build(), 1, 3, 5, false, BanReason.FLY);
     }
 
     @EventHandler
     public void fly(PlayerMoveEvent e) {
 
-	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
+	PlayerData pd = PlayerData.getPlayerData(player);
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
-	CraftPlayer cp = (CraftPlayer) p;
+	CraftPlayer cp = (CraftPlayer) player;
 	EntityPlayer ep = (EntityPlayer) cp.getHandle();
 
-	if (p.isFlying()) {
-	    debug(p, Arrays.asList("is flying"));
+	if (player.isFlying()) {
+	    debug(player, Arrays.asList("is flying"));
 	    return;
 	}
-	if (Playerchecks.isCreative(p)) {
-	    debug(p, Arrays.asList("is creative"));
+	if (PlayerUtils.isCreative(player)) {
+	    debug(player, Arrays.asList("is creative"));
 	    return;
 	}
-	if (p.getAllowFlight()) {
-	    debug(p, Arrays.asList("is allowed to fly"));
+	if (player.getAllowFlight()) {
+	    debug(player, Arrays.asList("is allowed to fly"));
 	    return;
 	}
 
 	if (System.currentTimeMillis() < pd.getVelocitycooldown()) {
-	    debug(p, Arrays.asList("is on velocity"));
+	    debug(player, Arrays.asList("is on velocity"));
 	    return;
 	}
 
-	debug(cp, Arrays.asList("" + Utils.difference(p.getLocation().getY(), pd.getLastOnGround().getY())));
+	debug(cp, Arrays.asList("" + MathUtils.difference(player.getLocation().getY(), pd.getLastOnGround().getY())));
 
-	if (p.getLocation().getY() - 1.26 > pd.getLastOnGround().getY()) {
+	if (player.getLocation().getY() - 1.26 > pd.getLastOnGround().getY()) {
 
 	    if (ep.h_()) {
-		pd.setLastOnGround(p.getLocation());
+		pd.setLastOnGround(player.getLocation());
 
 	    } else {
-		pd.addFly();
+		addViolation(player);
 		return;
 	    }
 	}

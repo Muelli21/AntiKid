@@ -4,7 +4,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import me.Antikid.types.BanReason;
-import me.Antikid.types.BanUtils;
+import me.Antikid.utils.BanUtils;
 
 public class BanGui extends AbstractGui {
 

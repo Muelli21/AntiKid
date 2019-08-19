@@ -11,8 +11,9 @@ import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 
+import me.Antikid.Antikid;
 import me.Antikid.gui.AbstractGui;
-import me.Antikid.main.Main;
+import me.Antikid.managers.ViolationManager;
 import net.minecraft.server.v1_7_R4.MinecraftServer;
 
 public class PlayerData {
@@ -20,7 +21,8 @@ public class PlayerData {
     public static HashMap<Player, PlayerData> playerdatas = new HashMap<>();
 
     private Player player, lastDamager = this.getPlayer();
-    private boolean frozen = false, debug = false;;
+    private boolean frozen = false;
+    private boolean debug = false;
 
     private Block lastBrokenBlock;
     private long lastBreakTime;
@@ -32,24 +34,13 @@ public class PlayerData {
     private Location frozenloc;
     private long lastReport;
     private int clicks = 0;
-    private int speed = 0;
-    private int jesus = 0;
-    private int fly = 0;
+
     private int cps = 0;
-    private int reach = 0;
+
     private long lastReach;
-    private int heal = 0;
     private int movepackets = 0;
     private int totalMovepackets = 0;
     private long healtime;
-    private int noslowdown = 0;
-    private int ladder = 0;
-    private int killaura = 0;
-    private int nofall = 0;
-    private int aim = 0;
-    private int velocity = 0;
-    private int microMovement = 0;
-    private int verticalSpeed = 0;
 
     private ClickActions hits = new ClickActions();
 
@@ -76,14 +67,15 @@ public class PlayerData {
     private boolean fakeplayervisible = false;
     private boolean velocityCheck = false;
     private SittingReachCheck sittingCheck;
-    private SavedDataManager dataManager;
+    private OfflinePlayerData dataManager;
 
     private PacketType packetType;
     private long packetTick;
     private HashMap<PacketType, AtomicInteger> packetAmount = new HashMap<>();
     private HashMap<PacketType, Long> lastPacketResetTime = new HashMap<>();
 
-    private Roast roast = new Roast();
+    private Roast roast;
+    private ViolationManager violationManager;
 
     private Vector lastVelocity;
     private Location lastServerSidedPosition;
@@ -92,9 +84,12 @@ public class PlayerData {
 
     private AbstractGui currentGui;
 
-    public PlayerData(Player p) {
-	this.player = p;
-	playerdatas.put(p, this);
+    public PlayerData(Player player) {
+	this.player = player;
+	this.roast = new Roast(player);
+	this.lastOnGround = player.getLocation();
+	this.violationManager = new ViolationManager(player);
+	playerdatas.put(player, this);
     }
 
     public void delete() {
@@ -103,7 +98,7 @@ public class PlayerData {
 	    public void run() {
 		playerdatas.remove(player);
 	    }
-	}.runTaskLater(Main.getPlugin(), 5 * 20);
+	}.runTaskLater(Antikid.getPlugin(), 5 * 20);
     }
 
     public void report() {
@@ -154,22 +149,6 @@ public class PlayerData {
 	this.clicks = clicks;
     }
 
-    public int getSpeed() {
-	return speed;
-    }
-
-    public void addSpeed() {
-	speed++;
-    }
-
-    public int getFly() {
-	return fly;
-    }
-
-    public void addFly() {
-	fly++;
-    }
-
     public long getFlycooldown() {
 	return flycooldown;
     }
@@ -184,22 +163,6 @@ public class PlayerData {
 
     public void addCps() {
 	cps++;
-    }
-
-    public int getJesus() {
-	return jesus;
-    }
-
-    public void addJesus() {
-	jesus++;
-    }
-
-    public int getReach() {
-	return reach;
-    }
-
-    public void addReach() {
-	reach++;
     }
 
     public long getJumpcooldown() {
@@ -304,30 +267,6 @@ public class PlayerData {
 	this.healtime = healtime;
     }
 
-    public int getHeal() {
-	return heal;
-    }
-
-    public void setHeal(int heal) {
-	this.heal = heal;
-    }
-
-    public int getNoslowdown() {
-	return noslowdown;
-    }
-
-    public void setNoslowdown(int noslowdown) {
-	this.noslowdown = noslowdown;
-    }
-
-    public int getLadder() {
-	return ladder;
-    }
-
-    public void setLadder(int ladder) {
-	this.ladder = ladder;
-    }
-
     public long getSprintcooldown() {
 	return sprintcooldown;
     }
@@ -360,48 +299,12 @@ public class PlayerData {
 	this.fakeplayer = fakeplayer;
     }
 
-    public int getKillaura() {
-	return killaura;
-    }
-
-    public void addKillaura() {
-	killaura++;
-    }
-
     public boolean isFakeplayervisible() {
 	return fakeplayervisible;
     }
 
     public void setFakeplayervisible(boolean fakeplayervisible) {
 	this.fakeplayervisible = fakeplayervisible;
-    }
-
-    public int getNofall() {
-	return nofall;
-    }
-
-    public void addNofall() {
-	nofall++;
-    }
-
-    public void setNofall(int nofall) {
-	this.nofall = nofall;
-    }
-
-    public int getAim() {
-	return aim;
-    }
-
-    public void addAim() {
-	aim++;
-    }
-
-    public int getVelocity() {
-	return velocity;
-    }
-
-    public void addVelocity() {
-	velocity++;
     }
 
     public boolean isVelocityCheck() {
@@ -420,43 +323,15 @@ public class PlayerData {
 	this.sittingCheck = sittingCheck;
     }
 
-    public void setSpeed(int speed) {
-	this.speed = speed;
-    }
-
-    public void setFly(int fly) {
-	this.fly = fly;
-    }
-
     public void setCps(int cps) {
 	this.cps = cps;
     }
 
-    public void setJesus(int jesus) {
-	this.jesus = jesus;
-    }
-
-    public void setReach(int reach) {
-	this.reach = reach;
-    }
-
-    public void setKillaura(int killaura) {
-	this.killaura = killaura;
-    }
-
-    public void setAim(int aim) {
-	this.aim = aim;
-    }
-
-    public void setVelocity(int velocity) {
-	this.velocity = velocity;
-    }
-
-    public SavedDataManager getDataManager() {
+    public OfflinePlayerData getDataManager() {
 	return dataManager;
     }
 
-    public void setDataManager(SavedDataManager dataManager) {
+    public void setDataManager(OfflinePlayerData dataManager) {
 	this.dataManager = dataManager;
     }
 
@@ -490,18 +365,6 @@ public class PlayerData {
 
     public void setRoast(Roast roast) {
 	this.roast = roast;
-    }
-
-    public int getMicroMovement() {
-	return microMovement;
-    }
-
-    public void setMicroMovement(int microMovement) {
-	this.microMovement = microMovement;
-    }
-
-    public void addMicroMovement() {
-	microMovement++;
     }
 
     public long getLastReach() {
@@ -644,18 +507,6 @@ public class PlayerData {
 	this.banned = banned;
     }
 
-    public int getVerticalSpeed() {
-	return verticalSpeed;
-    }
-
-    public void addVerticalSpeed() {
-	verticalSpeed++;
-    }
-
-    public void setVerticalSpeed(int verticalSpeed) {
-	this.verticalSpeed = verticalSpeed;
-    }
-
     public AbstractGui getCurrentGui() {
 	return currentGui;
     }
@@ -664,4 +515,16 @@ public class PlayerData {
 	this.currentGui = currentGui;
     }
 
+    public static PlayerData getPlayerData(Player player) {
+	PlayerData playerData = PlayerData.playerdatas.get(player);
+	return playerData;
+    }
+
+    public ViolationManager getViolationManager() {
+	return violationManager;
+    }
+
+    public static HashMap<Player, PlayerData> getPlayerDatas() {
+	return playerdatas;
+    }
 }

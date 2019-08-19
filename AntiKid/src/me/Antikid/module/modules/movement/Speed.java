@@ -10,37 +10,35 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
-import me.Antikid.types.MovementType;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class Speed extends Module implements Listener {
 
     public Speed() {
-	super("Speed", new ItemBuilder(Material.LEATHER_BOOTS).build());
+	super("Speed", new ItemBuilder(Material.LEATHER_BOOTS).build(), 1, 3, 5, false, BanReason.SPEED);
     }
 
     @EventHandler
     public void onSpeedMove(PlayerMoveEvent e) {
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	speed(e, p, pd, false);
     }
 
-    public void speed(PlayerMoveEvent e, Player p, PlayerData pd, boolean walk) {
+    public void speed(PlayerMoveEvent e, Player player, PlayerData pd, boolean walk) {
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
-	if (Playerchecks.isCreative(p)) { return; }
+	if (PlayerUtils.isCreative(player)) { return; }
 	if (System.currentTimeMillis() < pd.getVelocitycooldown() || System.currentTimeMillis() < pd.getHitcooldown()) { return; }
-	if (p.isInsideVehicle()) { return; }
-	if (p.isFlying()) { return; }
+	if (player.isInsideVehicle()) { return; }
+	if (player.isFlying()) { return; }
 
-	double walkSpeed = p.getWalkSpeed();
+	double walkSpeed = player.getWalkSpeed();
 	MovementType movementType = checkMovementType(e);
 	Vector move = e.getTo().toVector().subtract(e.getFrom().toVector());
 	move.setY(0);
@@ -50,12 +48,12 @@ public class Speed extends Module implements Listener {
 	}
 
 	double mxs = movementType.getMaxMetersPerSecond();
-	speedCheck(p, move, movementType, mxs, walkSpeed, false);
+	speedCheck(player, move, movementType, mxs, walkSpeed, false);
     }
 
-    public void speedCheck(Player p, Vector move, MovementType movementType, Double mxs, Double walkSpeed, boolean walk) {
+    public void speedCheck(Player player, Vector move, MovementType movementType, Double mxs, Double walkSpeed, boolean walk) {
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(player);
 
 	if (System.currentTimeMillis() < pd.getSpeedcooldown()) {
 	    int amp = pd.getSpeedamplifier() + 1;
@@ -67,79 +65,60 @@ public class Speed extends Module implements Listener {
 	    mxs = mxs * 0.77;
 	}
 
-	mxs = (mxs / 0.2) * p.getWalkSpeed();
+	mxs = (mxs / 0.2) * player.getWalkSpeed();
 
 	boolean legit;
 
 	if (move.length() > movementType.getMaxMetersPerSecond()) {
-	    pd.setSpeed(pd.getSpeed() + movementType.getMultiplier());
+	    addViolation(player);
 	    legit = false;
 	} else {
 	    legit = true;
 	}
 
-	printOutDifference(p, move, movementType.name(), mxs, legit);
+	printOutDifference(player, move, movementType.name(), mxs, legit);
     }
 
     public MovementType checkMovementType(PlayerMoveEvent e) {
 
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Double angle = Direction.directionAngle(e);
 
-	if (Playerchecks.isJumping(e))
+	if (PlayerUtils.isJumping(e))
 	    pd.setJumpcooldown(500);
 
-	if (Playerchecks.isBlockabove(p, e))
+	if (PlayerUtils.isBlockabove(p, e))
 	    pd.setBlockcooldown(800);
 
-	if (Playerchecks.isIce(p, e))
+	if (PlayerUtils.isIce(p, e))
 	    pd.setIcecooldown(700);
 
-	if (Playerchecks.hasSpeed(p, e))
+	if (PlayerUtils.hasSpeed(p, e))
 	    pd.setSpeedcooldown(800);
 
 	if (p.isSprinting())
 	    pd.setSprintcooldown(1000);
 
-	// If player is sneaking
 	if (p.isSneaking() && System.currentTimeMillis() > pd.getSprintcooldown()) {
-
-	    // If player is sneaking backwards
 	    if (angle > 70) { return MovementType.SNEAKING_BACKWARDS; }
 	    return MovementType.SNEAKING;
 	}
 
-	// If player is walking in cobweb
-	if (Playerchecks.isCobweb(e)) { return MovementType.COBWEB; }
+	if (PlayerUtils.isCobweb(e)) { return MovementType.COBWEB; }
 
-	// If player is jumping
 	if (System.currentTimeMillis() < pd.getJumpcooldown()) {
 
-	    // If player is jumping on ice and has a block above him
 	    if (System.currentTimeMillis() < pd.getBlockcooldown() && System.currentTimeMillis() < pd.getIcecooldown()) { return MovementType.JUMPING_ON_ICE_UNDER_BLOCK; }
-
-	    // If player is jumping and has a block above him
 	    if (System.currentTimeMillis() < pd.getBlockcooldown()) { return MovementType.JUMPING_UNDER_BLOCK; }
-
-	    // If player is jumping on ice
 	    if (System.currentTimeMillis() < pd.getIcecooldown()) { return MovementType.JUMPING_ON_ICE; }
-
-	    // If player is jumping and walking backwards
 	    if (angle > 70) { return MovementType.JUMPING_BACKWARDS; }
-
-	    // If player is jumping
 	    return MovementType.JUMPING;
 
 	} else {
 
-	    // If player is on ice and under a block
 	    if (System.currentTimeMillis() < pd.getBlockcooldown() && System.currentTimeMillis() < pd.getIcecooldown()) { return MovementType.ON_ICE_UNDER_BLOCK; }
-
-	    // If player is under a block
 	    if (System.currentTimeMillis() < pd.getBlockcooldown()) { return MovementType.UNDER_BLOCK; }
-
-	    // If player is on ice
 	    if (System.currentTimeMillis() < pd.getIcecooldown()) { return MovementType.ON_ICE; }
 	}
 
@@ -157,5 +136,63 @@ public class Speed extends Module implements Listener {
 	    color = "§a";
 
 	debug(p, Arrays.asList(moveType.toLowerCase() + " " + color + stringDifference + "§f/" + stringMxs + "m/s "));
+    }
+
+    enum MovementType {
+
+	SNEAKING(
+		0.2,
+		2),
+	SNEAKING_BACKWARDS(
+		0.1,
+		2),
+	COBWEB(
+		0.1,
+		5),
+	NORMAL(
+		0.29,
+		3),
+
+	JUMPING(
+		0.62,
+		1),
+	JUMPING_BACKWARDS(
+		0.3,
+		1),
+	JUMPING_ON_ICE(
+		0.58,
+		1),
+	JUMPING_ON_ICE_UNDER_BLOCK(
+		0.92,
+		1),
+	JUMPING_UNDER_BLOCK(
+		0.89,
+		1),
+
+	ON_ICE(
+		0.39,
+		1),
+	ON_ICE_UNDER_BLOCK(
+		0.92,
+		1),
+	UNDER_BLOCK(
+		0.68,
+		1);
+
+	private Double maxMetersPerSecond;
+	private Integer multiplier;
+
+	private MovementType(Double maxMetersPerSecond, Integer multiplier) {
+	    this.maxMetersPerSecond = maxMetersPerSecond;
+	    this.multiplier = multiplier;
+	}
+
+	public Double getMaxMetersPerSecond() {
+	    return maxMetersPerSecond;
+	}
+
+	public Integer getMultiplier() {
+	    return multiplier;
+	}
     }
 }

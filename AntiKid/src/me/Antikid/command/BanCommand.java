@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import me.Antikid.gui.BanGui;
 import me.Antikid.types.BanReason;
-import me.Antikid.types.BanUtils;
+import me.Antikid.utils.BanUtils;
 
 public class BanCommand implements CommandExecutor {
 
@@ -40,8 +40,9 @@ public class BanCommand implements CommandExecutor {
 		sender.sendMessage(ChatColor.RED + "Please use /ban [Name] [Reason]!");
 		return false;
 	    }
+
 	    String reason = args[1];
-	    BanUtils.ban(sender, target, reason, BanReason.PERMANENT.getBanTime());
+	    BanUtils.ban(sender, target, reason, BanReason.PERMANENT.getBanTime(), 0);
 
 	} else
 	    sender.sendMessage(ChatColor.RED + "Please use /ban [Name] [Reason]!");

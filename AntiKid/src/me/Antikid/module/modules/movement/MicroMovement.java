@@ -10,38 +10,37 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class MicroMovement extends Module implements Listener {
 
     public MicroMovement() {
-	super("Micromovement", new ItemBuilder(Material.CHAINMAIL_BOOTS).build());
+	super("Micromovement", new ItemBuilder(Material.CHAINMAIL_BOOTS).build(), 1, 3, 5, false, BanReason.MICROMOVEMENT);
     }
 
     @EventHandler
     public void microMove(PlayerMoveEvent e) {
 
-	Player p = e.getPlayer();
-	Entity entity = p;
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
+	Entity entity = player;
+	PlayerData pd = PlayerData.getPlayerData(player);
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
 	Vector move = e.getTo().toVector().subtract(e.getFrom().toVector());
 	move.setY(0);
 
-	if ((Playerchecks.isCreative(p)) || (Playerchecks.isBlockabove(p, e)) || (Playerchecks.isCobweb(e)) || (Playerchecks.isLiquid(p)) || (Playerchecks.isOngroundMicroMovement(p, e))
+	if ((PlayerUtils.isCreative(player)) || (PlayerUtils.isBlockabove(player, e)) || (PlayerUtils.isCobweb(e)) || (PlayerUtils.isLiquid(player)) || (PlayerUtils.isOngroundMicroMovement(player, e))
 		|| (!entity.isOnGround())) { return; }
 	if (System.currentTimeMillis() < pd.getVelocitycooldown()) { return; }
 
 	if (move.length() < 0.1 && move.length() > 0) {
-	    pd.addMicroMovement();
-	    debug(p, Arrays.asList(move.length() + ""));
+	    addViolation(player);
+	    debug(player, Arrays.asList(move.length() + ""));
 	}
     }
 }

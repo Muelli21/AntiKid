@@ -10,25 +10,25 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class Direction extends Module implements Listener {
 
     public Direction() {
-	super("Direction", new ItemBuilder.LeatherAmourBuilder(Material.LEATHER_HELMET, Color.ORANGE).build().build());
+	super("Direction", new ItemBuilder.LeatherAmourBuilder(Material.LEATHER_HELMET, Color.ORANGE).build().build(), -1, -1, -1, false, BanReason.OTHER);
     }
 
     @EventHandler
     public void direction(PlayerMoveEvent e) {
 
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(p)) { return; }
 
 	double angle = Direction.directionAngle(e);
 	String color = "§a";

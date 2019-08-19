@@ -6,9 +6,9 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.Antikid.main.Main;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
 
 public class Module {
 
@@ -18,10 +18,20 @@ public class Module {
     private boolean debug = false;
     private boolean banning = true;
     private ItemStack inventoryItem;
+    private int violationsAlert;
+    private int violationsRoast;
+    private int violationsBan;
+    private boolean experimental;
+    private BanReason banReason;
 
-    public Module(String name, ItemStack inventoryItem) {
+    public Module(String name, ItemStack inventoryItem, int violationsAlert, int violationsRoast, int violationsBan, boolean experimental, BanReason banReason) {
 	this.name = name;
 	this.inventoryItem = new ItemBuilder(inventoryItem).setName(name).build();
+	this.violationsAlert = violationsAlert;
+	this.violationsRoast = violationsRoast;
+	this.violationsBan = violationsBan;
+	this.experimental = experimental;
+	this.banReason = banReason;
 	modules.add(this);
     }
 
@@ -31,6 +41,14 @@ public class Module {
 
     public void setName(String name) {
 	this.name = name;
+    }
+
+    public BanReason getBanReason() {
+	return banReason;
+    }
+
+    public void setBanReason(BanReason banReason) {
+	this.banReason = banReason;
     }
 
     public boolean isEnabled() {
@@ -61,17 +79,29 @@ public class Module {
 	return inventoryItem;
     }
 
-    public void debug(Player p, List<String> debugMessages) {
-	PlayerData pd = Main.getPlayerData(p);
+    public static HashSet<Module> getModules() {
+	return modules;
+    }
 
-	if (isDebug() && pd.isDebug()) {
-	    debugMessages.forEach(message -> {
-		if (debugMessages.get(0).equals(message)) {
-		    message = "§f{§6De§cbug§f} > " + getName() + ": " + message;
-		}
-		p.sendMessage(message);
-	    });
-	}
+    public boolean isExperimental() {
+	return experimental;
+    }
+
+    public void addViolation(Player player) {
+	PlayerData pd = PlayerData.getPlayerData(player);
+	pd.getViolationManager().addViolation(this, 1);
+    }
+
+    public int getViolationsAlert() {
+	return violationsAlert;
+    }
+
+    public int getViolationsRoast() {
+	return violationsRoast;
+    }
+
+    public int getViolationsBan() {
+	return violationsBan;
     }
 
     public static Module getModuleByName(String name) {
@@ -85,5 +115,18 @@ public class Module {
 	modules.forEach(module -> {
 	    module.setEnabled(enabled);
 	});
+    }
+
+    public void debug(Player player, List<String> debugMessages) {
+	PlayerData pd = PlayerData.getPlayerData(player);
+
+	if (isDebug() && pd.isDebug()) {
+	    debugMessages.forEach(message -> {
+		if (debugMessages.get(0).equals(message)) {
+		    message = "§f{§6De§cbug§f} > " + getName() + ": " + message;
+		}
+		player.sendMessage(message);
+	    });
+	}
     }
 }

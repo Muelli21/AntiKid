@@ -1,4 +1,4 @@
-package me.Antikid.types;
+package me.Antikid.utils;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -15,28 +15,44 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import me.Antikid.main.Main;
+import me.Antikid.types.PlayerData;
 import net.minecraft.server.v1_7_R4.AxisAlignedBB;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
+import net.minecraft.server.v1_7_R4.MinecraftServer;
 
-public class Playerchecks implements Listener {
+public class PlayerUtils implements Listener {
 
     static final double ON_GROUND = -0.0784000015258789;
     static final double JUMP = 0.41999998688697815;
 
-    public static boolean isCreative(Player p) {
-	if (p.getGameMode() == GameMode.CREATIVE) { return true; }
+    public static boolean isCreative(Player player) {
+	if (player.getGameMode() == GameMode.CREATIVE) { return true; }
 	return false;
     }
 
-    public static int ping(Player p) {
-	CraftPlayer craftplayer = (CraftPlayer) p;
+    public static boolean checkAble(Player player) {
+
+	if (ServerUtils.getTps() < 19.5) { return false; }
+	if (PlayerUtils.getPing(player) > 250) { return false; }
+	if (MinecraftServer.currentTick < 5 * 20) { return false; }
+	return true;
+    }
+
+    public static boolean checkAbleWithoutPing(Player player) {
+
+	if (ServerUtils.getTps() < 19.5) { return false; }
+	if (MinecraftServer.currentTick < 5 * 20) { return false; }
+	return true;
+    }
+
+    public static int getPing(Player player) {
+	CraftPlayer craftplayer = (CraftPlayer) player;
 	int ping = craftplayer.getHandle().ping;
 	return ping;
     }
 
     public static boolean isFalling(Player p, PlayerMoveEvent e) {
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	if (pd.getFalldistance() - p.getFallDistance() < -0.3 || System.currentTimeMillis() < pd.getOnGroundcooldown()) { return true; }
 	return false;
     }
@@ -124,7 +140,7 @@ public class Playerchecks implements Listener {
 
     public static boolean hasSpeed(Player p, PlayerMoveEvent e) {
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
 	if (p.hasPotionEffect(PotionEffectType.SPEED)) {
 	    for (PotionEffect effect : p.getActivePotionEffects()) {
@@ -136,8 +152,6 @@ public class Playerchecks implements Listener {
 	}
 	return false;
     }
-
-    
 
     public static boolean isCobweb(PlayerMoveEvent e) {
 

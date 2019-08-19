@@ -16,13 +16,12 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
 import me.Antikid.types.BanReason;
-import me.Antikid.types.BanUtils;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.BanUtils;
+import me.Antikid.utils.PlayerUtils;
+import me.Antikid.utils.Utils;
 
 public class Packets implements PacketListener {
 
@@ -50,8 +49,8 @@ public class Packets implements PacketListener {
     public void onPacketReceiving(PacketEvent e) {
 
 	PacketContainer packet = e.getPacket();
-	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
+	PlayerData pd = PlayerData.getPlayerData(player);
 	PacketType packetType = packet.getType();
 
 	// if (pd.msOnline() > 10 * 1000) {
@@ -111,7 +110,7 @@ public class Packets implements PacketListener {
 	// }
 	// }
 
-	if (MoveListener.checkAbleWithoutPing(p)) {
+	if (PlayerUtils.checkAbleWithoutPing(player)) {
 	    HashMap<PacketType, AtomicInteger> packetAmount = pd.getPacketAmount();
 
 	    if (pd.getLastPacketResetTime().get(packetType) == null) {
@@ -142,8 +141,10 @@ public class Packets implements PacketListener {
 			    pd.getSittingCheck().ban();
 			    return;
 			}
-			pd.setKillaura(pd.getKillaura() + 1);
-			Module.getModuleByName("killaura").debug(p, Arrays.asList("hit"));
+
+			Module module = Module.getModuleByName("killaura");
+			module.addViolation(player);
+			module.debug(player, Arrays.asList("hit"));
 		    }
 		}
 	    }

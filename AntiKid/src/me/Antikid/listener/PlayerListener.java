@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.util.Vector;
 
-import me.Antikid.main.Main;
 import me.Antikid.types.MoveTrail;
 import me.Antikid.types.PlayerData;
 import me.Antikid.types.SittingReachCheck;
@@ -26,7 +25,7 @@ public class PlayerListener implements Listener {
 	if (!(e.getExited() instanceof Player))
 	    return;
 	Player p = (Player) e.getExited();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	SittingReachCheck check = pd.getSittingCheck();
 
 	if (check != null) {
@@ -38,7 +37,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onToggleFlight(PlayerToggleFlightEvent e) {
 	Player p = (Player) e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	pd.setVelocitycooldown(8000);
     }
 
@@ -49,7 +48,7 @@ public class PlayerListener implements Listener {
 
 	if (!p.isOnline()) { return; }
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Vector vel = e.getVelocity();
 
 	pd.setVelocitycooldown((long) (vel.length() * 2000));
@@ -61,7 +60,7 @@ public class PlayerListener implements Listener {
 	if (!(e.getEntity() instanceof Player)) { return; }
 
 	Player p = (Player) e.getEntity();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
 	if (e.getCause().equals(DamageCause.ENTITY_ATTACK)) {
 	    pd.setHitcooldown(500);
@@ -87,7 +86,7 @@ public class PlayerListener implements Listener {
 
     private void resetPlayer(Player p, Location loc) {
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
 	if (pd == null) { return; }
 

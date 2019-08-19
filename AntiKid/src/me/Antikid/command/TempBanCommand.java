@@ -7,7 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import me.Antikid.types.BanUtils;
+import me.Antikid.utils.BanUtils;
 
 public class TempBanCommand implements CommandExecutor {
 
@@ -34,7 +34,7 @@ public class TempBanCommand implements CommandExecutor {
 
 	    int time = (Integer.parseInt(args[1]) * 24 * 60 * 60 * 1000);
 	    long timetounban = System.currentTimeMillis() + (time);
-	    BanUtils.ban(sender, target, reason, timetounban);
+	    BanUtils.ban(sender, target, reason, timetounban, 0);
 	    return false;
 
 	} else
@@ -43,7 +43,7 @@ public class TempBanCommand implements CommandExecutor {
 
 	    int time = (Integer.parseInt(args[1]) * 60 * 60 * 1000);
 	    long timetounban = System.currentTimeMillis() + (time);
-	    BanUtils.ban(sender, target, reason, timetounban);
+	    BanUtils.ban(sender, target, reason, timetounban, 0);
 	    return false;
 
 	} else
@@ -52,7 +52,7 @@ public class TempBanCommand implements CommandExecutor {
 
 	    int time = (Integer.parseInt(args[1]) * 60 * 1000);
 	    long timetounban = System.currentTimeMillis() + (time);
-	    BanUtils.ban(sender, target, reason, timetounban);
+	    BanUtils.ban(sender, target, reason, timetounban, 0);
 	    return false;
 
 	} else
@@ -61,7 +61,7 @@ public class TempBanCommand implements CommandExecutor {
 
 	    int time = (Integer.parseInt(args[1]) * 1000);
 	    long timetounban = System.currentTimeMillis() + (time);
-	    BanUtils.ban(sender, target, reason, timetounban);
+	    BanUtils.ban(sender, target, reason, timetounban, 0);
 	    return false;
 
 	} else

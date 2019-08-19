@@ -12,35 +12,34 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.MathUtils;
+import me.Antikid.utils.PlayerUtils;
 
 public class Velocity extends Module implements Listener {
 
     public Velocity() {
-	super("Velocity", new ItemBuilder(Material.ANVIL).build());
+	super("Velocity", new ItemBuilder(Material.ANVIL).build(), 1, 3, 5, false, BanReason.VELOCITY);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onKnockBack(PlayerVelocityEvent e) {
 
-	Player p = (Player) e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = (Player) e.getPlayer();
+	PlayerData pd = PlayerData.getPlayerData(player);
 	pd.setLastVelocity(e.getVelocity());
-	pd.setLastServerSidedPosition(p.getLocation());
-	Entity entity = p;
+	pd.setLastServerSidedPosition(player.getLocation());
+	Entity entity = player;
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
-	if (Playerchecks.isCreative(p) || !entity.isOnGround()) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
+	if (PlayerUtils.isCreative(player) || !entity.isOnGround()) { return; }
 
 	if (pd.isHit() && !e.isCancelled()) {
-	    pd.addVelocity();
-	    debug(p, Arrays.asList("no PlayerMoveEvent"));
+	    addViolation(player);
+	    debug(player, Arrays.asList("no PlayerMoveEvent"));
 	}
 
 	if (e.getVelocity().getY() > 0) {
@@ -49,38 +48,15 @@ public class Velocity extends Module implements Listener {
 	}
     }
 
-    // @EventHandler(priority = EventPriority.MONITOR)
-    // public void onHit(EntityDamageByEntityEvent e) {
-    //
-    // if (!(e.getEntity() instanceof Player)) { return; }
-    // if (!(e.getDamager() instanceof Player)) { return; }
-    //
-    // Player p = (Player) e.getEntity();
-    // PlayerData pd = Main.getPlayerData(p);
-    //
-    // if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
-    // if (Playerchecks.isCreative(p)) { return; }
-    //
-    // if (pd.isHit() && !e.isCancelled()) {
-    // pd.addVelocity();
-    // if (isDebug() && pd.isDebug()) {
-    // p.sendMessage("AntiKb");
-    // }
-    // }
-    //
-    // pd.setHit(true);
-    // }
-
     @EventHandler
     public void velocity(PlayerMoveEvent e) {
 
-	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
+	PlayerData pd = PlayerData.getPlayerData(player);
 
-	if (Playerchecks.isCreative(p))
-	    return;
+	if (PlayerUtils.isCreative(player)) { return; }
 
-	if (Playerchecks.isBlockabove(p, e) || Playerchecks.isCobweb(e) || Playerchecks.isLiquid(p)) {
+	if (PlayerUtils.isBlockabove(player, e) || PlayerUtils.isCobweb(e) || PlayerUtils.isLiquid(player)) {
 	    pd.setVelocityCheck(false);
 	    pd.setHit(false);
 	    return;
@@ -90,11 +66,11 @@ public class Velocity extends Module implements Listener {
 	    pd.setHit(false);
 	}
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
 	if (pd.isVelocityCheck()) {
 
-	    double distance = Utils.difference(pd.getLastServerSidedPosition().getY(), e.getTo().getY());
+	    double distance = MathUtils.difference(pd.getLastServerSidedPosition().getY(), e.getTo().getY());
 	    double ratio = Math.floor((distance / pd.getLastVelocity().getY()) * 100) + 1;
 
 	    DecimalFormat df = new DecimalFormat("#.##");
@@ -104,8 +80,8 @@ public class Velocity extends Module implements Listener {
 	    pd.setVelocityCheck(false);
 
 	    if ((ratio < 99 && ratio > 0 && distance != 0)) {
-		debug(p, Arrays.asList("§c" + ratio, " - AntiKb distance: §6 " + stringDistance, " - AntiKb velocity: §e " + stringYVelocity));
-		pd.addVelocity();
+		debug(player, Arrays.asList("§c" + ratio, " - AntiKb distance: §6 " + stringDistance, " - AntiKb velocity: §e " + stringYVelocity));
+		addViolation(player);
 	    }
 	}
     }

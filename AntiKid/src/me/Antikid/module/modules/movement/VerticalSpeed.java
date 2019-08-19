@@ -10,48 +10,47 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffectType;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.MathUtils;
+import me.Antikid.utils.PlayerUtils;
 
 public class VerticalSpeed extends Module implements Listener {
 
     public VerticalSpeed() {
-	super("VerticalSpeed", new ItemBuilder(Material.SPONGE).build());
+	super("VerticalSpeed", new ItemBuilder(Material.SPONGE).build(), 1, 3, 5, false, BanReason.VERTICALSPEED);
     }
 
     @EventHandler
     public void verticalSpeed(PlayerMoveEvent e) {
 
-	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
+	PlayerData pd = PlayerData.getPlayerData(player);
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 	if (System.currentTimeMillis() < pd.getVelocitycooldown() || System.currentTimeMillis() < pd.getHitcooldown()) { return; }
-	if (Playerchecks.isCreative(p)) { return; }
-	if (p.isFlying()) { return; }
-	if (p.hasPotionEffect(PotionEffectType.JUMP)) { return; }
+	if (PlayerUtils.isCreative(player)) { return; }
+	if (player.isFlying()) { return; }
+	if (player.hasPotionEffect(PotionEffectType.JUMP)) { return; }
 
 	double y1 = e.getFrom().getY();
 	double y2 = e.getTo().getY();
-	double difference = Utils.difference(y1, y2);
+	double difference = MathUtils.difference(y1, y2);
 
 	if (y1 < y2) {
 	    if (difference > 0.51) {
-		pd.addVerticalSpeed();
-		printOutDifference(p, difference, "VerticalSpeed", 0.5);
+		addViolation(player);
+		printOutDifference(player, difference, "VerticalSpeed", 0.5);
 	    }
 	}
     }
 
-    public void printOutDifference(Player p, double differencey, String moveType, double mxs) {
+    public void printOutDifference(Player player, double differencey, String moveType, double mxs) {
 	DecimalFormat df = new DecimalFormat("#.##");
 	String stringdiffx = df.format(differencey);
-	debug(p, Arrays.asList(moveType + stringdiffx + "mxs" + mxs));
+	debug(player, Arrays.asList(moveType + stringdiffx + "mxs" + mxs));
     }
 
 }

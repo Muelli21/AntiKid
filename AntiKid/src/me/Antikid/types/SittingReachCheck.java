@@ -11,7 +11,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import me.Antikid.main.Main;
+import me.Antikid.Antikid;
+import me.Antikid.utils.BanUtils;
+import me.Antikid.utils.MathUtils;
+import me.Antikid.utils.ServerUtils;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.server.v1_7_R4.WorldServer;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
@@ -25,10 +28,10 @@ public class SittingReachCheck {
     private BukkitTask task;
 
     public SittingReachCheck(Player p, Entity toSitOn, long time) {
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Location loc = p.getLocation();
 	Location spawnLoc = loc.add(0, 1, 0);
-	Player random = Utils.getRandomPlayer(p);
+	Player random = ServerUtils.getRandomPlayer(p);
 	CraftPlayer crandom = (CraftPlayer) random;
 	EntityPlayer erandom = (EntityPlayer) crandom.getHandle();
 	GameProfile profile = erandom.getProfile();
@@ -43,18 +46,18 @@ public class SittingReachCheck {
 	    @Override
 	    public void run() {
 		toSitOn.teleport(spawnLoc);
-		Vector moveVector = Utils.getDirectionVector(0, p.getLocation().getYaw());
+		Vector moveVector = MathUtils.getDirectionVector(0, p.getLocation().getYaw());
 		moveVector.normalize().multiply(3.41);
-		Location move = p.getLocation().add(Utils.getDirectionVector(0, p.getLocation().getYaw()));
+		Location move = p.getLocation().add(MathUtils.getDirectionVector(0, p.getLocation().getYaw()));
 		entity.move(p.getLocation().getYaw(), p.getLocation().getPitch(), true, move, false);
 	    }
-	}.runTaskTimer(Main.getPlugin(), 0, time);
+	}.runTaskTimer(Antikid.getPlugin(), 0, time);
 	this.setTask(task);
 	this.entity = entity;
     }
 
     public void stop(boolean killEntity) {
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	pd.setSittingCheck(null);
 	toSitOn.setPassenger(null);
 	task.cancel();
@@ -72,16 +75,10 @@ public class SittingReachCheck {
     }
 
     public void ban() {
-	new BukkitRunnable() {
 
-	    @Override
-	    public void run() {
-		int time = (30 * 24 * 60 * 60 * 1000);
-		long timetounban = System.currentTimeMillis() + (time);
-		BanUtils.ban(Bukkit.getConsoleSender(), p, "reach", timetounban);
-		return;
-	    }
-	}.runTaskLater(Main.getPlugin(), 30 * 20);
+	int time = (30 * 24 * 60 * 60 * 1000);
+	long timetounban = System.currentTimeMillis() + (time);
+	BanUtils.ban(Bukkit.getConsoleSender(), p, "reach", timetounban, System.currentTimeMillis() + 60 * 1000);
     }
 
     public Player getPlayer() {

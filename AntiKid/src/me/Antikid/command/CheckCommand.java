@@ -9,10 +9,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import me.Antikid.main.Main;
+import me.Antikid.managers.YamlFileManager;
+import me.Antikid.module.Module;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.SavedDataManager;
-import me.Antikid.types.YamlFileManager;
+import me.Antikid.utils.BanUtils;
 
 public class CheckCommand implements CommandExecutor {
 
@@ -24,6 +24,7 @@ public class CheckCommand implements CommandExecutor {
 	if (!sender.hasPermission("administration")) { return false; }
 
 	if (args.length == 2) {
+
 	    if (args[0].equals("log")) {
 		if (Bukkit.getOfflinePlayer(args[1]) == null) {
 		    sender.sendMessage(ChatColor.RED + "This player does not exist!");
@@ -38,13 +39,17 @@ public class CheckCommand implements CommandExecutor {
 		}
 
 		Player target = Bukkit.getPlayer(args[1]);
-		PlayerData td = Main.getPlayerData(target);
+		PlayerData td = PlayerData.getPlayerData(target);
 
 		int roasts = td.getRoast().getRoasts();
 		int roastsExperimental = td.getRoast().getRoastsExperimental();
 		int cps = td.getCps();
-		int reachhits = td.getReach();
-		int killaura = td.getKillaura();
+
+		Module reachModule = Module.getModuleByName("reach");
+		Module killauraModule = Module.getModuleByName("killaura");
+
+		int reachhits = td.getViolationManager().getViolationAmount(reachModule);
+		int killaura = td.getViolationManager().getViolationAmount(killauraModule);
 
 		sender.sendMessage("-----------------------------");
 		sender.sendMessage("§cThe player " + target.getName() + " has:");
@@ -78,13 +83,18 @@ public class CheckCommand implements CommandExecutor {
 		String reason = file.getString("banReason");
 		String date = file.getString("banDate");
 		long time = file.getLong("banTime");
+		long executeTime = file.getLong("executeTime");
 		long timetounban = time - System.currentTimeMillis();
 		long seconds = timetounban / 1000;
 
 		if (timetounban < 0) {
-		    SavedDataManager.unban(target);
+		    BanUtils.unban(target);
 		    sender.sendMessage("§cThis player is not banned at all!");
 		    return false;
+		}
+
+		if (System.currentTimeMillis() > executeTime) {
+		    BanUtils.ban(Bukkit.getConsoleSender(), target, reason, time, 0);
 		}
 
 		long s = seconds % 60;

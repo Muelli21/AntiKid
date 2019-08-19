@@ -8,34 +8,32 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
-import me.Antikid.types.PlayerData;
+import me.Antikid.types.BanReason;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class NoSlowdown extends Module implements Listener {
 
     public NoSlowdown() {
-	super("NoSlowdown", new ItemBuilder(Material.SOUL_SAND).build());
+	super("NoSlowdown", new ItemBuilder(Material.SOUL_SAND).build(), 1, 3, 5, false, BanReason.SPEED);
     }
 
     @EventHandler
     public void slowdown(PlayerMoveEvent e) {
 
-	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = e.getPlayer();
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
-	if (p.isSneaking() && p.isSprinting()) {
-	    pd.setNoslowdown(pd.getNoslowdown() + 1);
-	    debug(p, Arrays.asList("noslowdown sneak"));
+	if (player.isSneaking() && player.isSprinting()) {
+	    addViolation(player);
+	    debug(player, Arrays.asList("noslowdown sneak"));
 	}
 
-	if (p.isConversing() && p.isSprinting()) {
-	    pd.setNoslowdown(pd.getNoslowdown() + 1);
-	    debug(p, Arrays.asList("noslowdown conversing"));
+	if (player.isConversing() && player.isSprinting()) {
+	    addViolation(player);
+	    debug(player, Arrays.asList("noslowdown conversing"));
 
 	}
     }

@@ -1,6 +1,6 @@
 authors: [Muelli]
 name: Antikid
-main: me.Antikid.main.Main
+main: me.Antikid.Antikid
 version: 1.0
 depend: [ProtocolLib]
 commands:

@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.Antikid.main.Main;
 import me.Antikid.types.PlayerData;
 
 public class DebugCommand implements CommandExecutor {
@@ -13,14 +12,12 @@ public class DebugCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-	if (!(sender instanceof Player))
-	    return false;
+	if (!(sender instanceof Player)) { return false; }
 
 	Player p = (Player) sender;
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 
-	if (args.length != 0)
-	    return false;
+	if (args.length != 0) { return false; }
 
 	pd.setDebug(!pd.isDebug());
 	p.sendMessage("Debugmode: " + pd.isDebug());

@@ -1,17 +1,18 @@
-package me.Antikid.types;
+package me.Antikid.managers;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
-import me.Antikid.main.Main;
+import me.Antikid.Antikid;
+import me.Antikid.AntikidData;
 import me.Antikid.module.Module;
 
 public class DataManager {
 
     public static void loadAntikid() {
 
-	FileConfiguration config = Main.getPlugin().getConfig();
+	FileConfiguration config = Antikid.getPlugin().getConfig();
 	boolean ban = config.getBoolean("Antikid.ban");
-	Main.ban = ban;
+	AntikidData.getData().setBanning(ban);
 
 	Module.modules.forEach(module -> {
 
@@ -27,8 +28,8 @@ public class DataManager {
 
     public static void saveAntikid() {
 
-	FileConfiguration config = Main.getPlugin().getConfig();
-	config.set("Antikid.ban", Main.ban);
+	FileConfiguration config = Antikid.getPlugin().getConfig();
+	config.set("Antikid.ban", AntikidData.getData().isBanning());
 
 	Module.modules.forEach(module -> {
 	    config.set("Antikid.module." + module.getName() + ".enabled", module.isEnabled());
@@ -36,6 +37,6 @@ public class DataManager {
 	    config.set("Antikid.module." + module.getName() + ".debug", module.isDebug());
 	});
 
-	Main.getPlugin().saveConfig();
+	Antikid.getPlugin().saveConfig();
     }
 }

@@ -10,11 +10,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.Antikid.main.Main;
+import me.Antikid.AntikidData;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
-import me.Antikid.types.ListUtils;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.ListUtils;
 
 public class ModulesGui extends AbstractGui {
 
@@ -52,13 +52,13 @@ public class ModulesGui extends AbstractGui {
 
 	ItemStack item = null;
 
-	if (Main.isBanning()) {
+	if (AntikidData.getData().isBanning()) {
 	    item = new ItemBuilder.DyeBuilder(DyeColor.GREEN).build().setName("AntiKid is: §abanning").build();
 	} else {
 	    item = new ItemBuilder.DyeBuilder(DyeColor.RED).build().setName("AntiKid is: §cnot banning").build();
 	}
 	setItemLeftAction(4, item, p -> {
-	    Main.toggleBan();
+	    AntikidData.getData().toggleBan();
 	    setBanToggleItem();
 	});
     }
@@ -66,7 +66,7 @@ public class ModulesGui extends AbstractGui {
     public void setPersonalDebugToggleItem() {
 
 	ItemStack item = null;
-	PlayerData pd = Main.getPlayerData(getPlayer());
+	PlayerData pd = PlayerData.getPlayerData(getPlayer());
 
 	if (pd.isDebug()) {
 	    item = new ItemBuilder.SkullHeadBuilder(getPlayer()).build().setName("Debugmode: §adebugging").build();

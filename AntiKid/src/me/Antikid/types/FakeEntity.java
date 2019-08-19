@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import me.Antikid.main.Main;
+import me.Antikid.Antikid;
 import net.minecraft.server.v1_7_R4.DataWatcher;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.server.v1_7_R4.MathHelper;
@@ -288,7 +288,7 @@ public class FakeEntity {
 		if (i > 20)
 		    cancel();
 	    }
-	}.runTaskTimer(Main.getPlugin(), 0, 1);
+	}.runTaskTimer(Antikid.getPlugin(), 0, 1);
 	PacketPlayOutEntityVelocity velPacket = new PacketPlayOutEntityVelocity(ep);
 	((CraftPlayer) p).getHandle().playerConnection.sendPacket(velPacket);
     }

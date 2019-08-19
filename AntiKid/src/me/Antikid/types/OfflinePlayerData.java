@@ -1,12 +1,8 @@
 package me.Antikid.types;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import me.Antikid.main.Main;
-
-public class SavedDataManager {
+public class OfflinePlayerData {
 
     private transient Player p;
     private String uuid;
@@ -16,12 +12,13 @@ public class SavedDataManager {
     private boolean mute;
     private long muteTime;
     private String muteReason;
+    private long futureBanTime;
 
-    public SavedDataManager(Player p) {
+    public OfflinePlayerData(Player p) {
 	this.p = p;
 	this.uuid = p.getUniqueId().toString();
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	pd.setDataManager(this);
     }
 
@@ -85,25 +82,11 @@ public class SavedDataManager {
 	this.muteReason = muteReason;
     }
 
-    public static void ban(OfflinePlayer offlinePlayer, String reason, long time, String dateString) {
-	YamlFileManager fileManager = new YamlFileManager();
-	YamlConfiguration file = fileManager.loadFile("plugins/PlayerFiles", offlinePlayer.getUniqueId().toString());
-
-	file.set("ban", true);
-	file.set("banReason", reason);
-	file.set("banTime", time);
-	file.set("banDate", dateString);
-	fileManager.save();
+    public long getFutureBanTime() {
+	return futureBanTime;
     }
 
-    public static void unban(OfflinePlayer offlinePlayer) {
-	YamlFileManager fileManager = new YamlFileManager();
-	YamlConfiguration file = fileManager.loadFile("plugins/PlayerFiles", offlinePlayer.getUniqueId().toString());
-
-	file.set("ban", false);
-	file.set("banReason", null);
-	file.set("banTime", null);
-	file.set("banDate", null);
-	fileManager.save();
+    public void setFutureBanTime(long futureBanTime) {
+	this.futureBanTime = futureBanTime;
     }
 }

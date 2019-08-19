@@ -1,4 +1,4 @@
-package me.Antikid.types;
+package me.Antikid.managers;
 
 import java.io.File;
 import java.io.IOException;

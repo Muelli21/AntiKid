@@ -1,6 +1,5 @@
 package me.Antikid.module.modules.combat;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,13 +9,12 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import me.Antikid.module.Module;
 import me.Antikid.types.BanReason;
-import me.Antikid.types.BanUtils;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.utils.ItemBuilder;
 
 public class Vape extends Module implements Listener, PluginMessageListener {
 
     public Vape() {
-	super("Vape", new ItemBuilder(Material.EXP_BOTTLE).build());
+	super("Vape", new ItemBuilder(Material.EXP_BOTTLE).build(), -1, -1, 1, false, BanReason.MODIFIED_CLIENT);
     }
 
     @EventHandler
@@ -26,9 +24,9 @@ public class Vape extends Module implements Listener, PluginMessageListener {
     }
 
     @Override
-    public void onPluginMessageReceived(String channel, Player p, byte[] data) {
+    public void onPluginMessageReceived(String channel, Player player, byte[] data) {
 	if (channel.equals("LOLIMAHACKER")) {
-	    BanUtils.delayedBan(Bukkit.getConsoleSender(), p, BanReason.MODIFIED_CLIENT, 60 * 20);
+	    addViolation(player);
 	}
     }
 }

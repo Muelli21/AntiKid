@@ -12,19 +12,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
+import me.Antikid.managers.ViolationManager;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.MoveTrail;
 import me.Antikid.types.MoveTrail.Move;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.Playerchecks;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class Reach extends Module implements Listener {
 
     public Reach() {
-	super("Reach", new ItemBuilder(Material.STONE_SWORD).build());
+	super("Reach", new ItemBuilder(Material.STONE_SWORD).build(), 1, 3, 5, false, BanReason.REACH);
     }
 
     @EventHandler
@@ -32,19 +32,19 @@ public class Reach extends Module implements Listener {
 
 	if (!(e.getDamager() instanceof Player)) { return; }
 
-	Player p = (Player) e.getDamager();
+	Player player = (Player) e.getDamager();
 	Entity entityTarget = e.getEntity();
 	Entity entityPlayer = e.getDamager();
 
-	PlayerData pd = Main.getPlayerData(p);
-	MoveTrail trail = MoveTrail.trails.get(p);
+	PlayerData pd = PlayerData.getPlayerData(player);
+	MoveTrail trail = MoveTrail.trails.get(player);
 
-	if (!isEnabled() || !MoveListener.checkAble(p) || entityTarget instanceof Player && !MoveListener.checkAble((Player) entityTarget)) { return; }
-	if (Playerchecks.isCreative(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player) || entityTarget instanceof Player && !PlayerUtils.checkAble((Player) entityTarget)) { return; }
+	if (PlayerUtils.isCreative(player)) { return; }
 
 	Location locTarget = entityTarget.getLocation();
 
-	int delay = 5 + ((int) Playerchecks.ping(p) / 50);
+	int delay = 5 + ((int) PlayerUtils.getPing(player) / 50);
 	Iterator<Move> itr = trail.getLastEntries(delay);
 	double reach = Double.MAX_VALUE;
 
@@ -65,25 +65,25 @@ public class Reach extends Module implements Listener {
 		String color = "§a";
 
 		if (reach > 3.8) {
-		    pd.addReach();
+		    addViolation(player);
 		    pd.setFakeplayervisible(true);
 		    color = "§6";
 		}
 
 		if (reach > 4) {
-		    pd.addReach();
+		    addViolation(player);
 		    color = "§c";
 
 		}
 
 		if (reach > 4.5) {
-		    pd.addReach();
+		    addViolation(player);
 		    color = "§4";
 		}
 
 		DecimalFormat df = new DecimalFormat("#.##");
 		String stringReach = df.format(reach);
-		debug(p, Arrays.asList(color + stringReach + " §fblocks"));
+		debug(player, Arrays.asList(color + stringReach + " §fblocks"));
 	    }
 	}
     }
@@ -91,10 +91,13 @@ public class Reach extends Module implements Listener {
     public static void handleReach(PlayerData pd) {
 
 	long time = 60 * 1000;
+	Module module = Module.getModuleByName("reach");
+	ViolationManager violationManager = pd.getViolationManager();
 
 	if (System.currentTimeMillis() - pd.getLastReach() > time) {
-	    if (pd.getReach() > 0)
-		pd.setReach(pd.getReach() - 1);
+	    if (violationManager.hasViolation(module) && violationManager.getViolations().get(module).getViolations() > 0) {
+		pd.getViolationManager().addViolation(module, -1);
+	    }
 	}
     }
 }

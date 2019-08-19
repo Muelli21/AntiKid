@@ -11,11 +11,10 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import me.Antikid.main.Main;
+import me.Antikid.managers.YamlFileManager;
 import me.Antikid.types.MoveTrail;
 import me.Antikid.types.PlayerData;
-import me.Antikid.types.SavedDataManager;
-import me.Antikid.types.YamlFileManager;
+import me.Antikid.utils.BanUtils;
 
 public class JoinListener implements Listener {
 
@@ -31,7 +30,7 @@ public class JoinListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
 
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	pd.delete();
 	MoveTrail.trails.remove(p);
     }
@@ -45,21 +44,27 @@ public class JoinListener implements Listener {
 	YamlFileManager fileManager = new YamlFileManager();
 	YamlConfiguration file = fileManager.loadFile("plugins/PlayerFiles", uuid);
 
-	if (file == null || !file.getBoolean("ban")) { return; }
+	if (file == null || !file.getBoolean("ban") || !(file.getLong("executeTime") != 0)) { return; }
 
 	String reason = file.getString("banReason");
+	long executeTime = file.getLong("executeTime");
 	long time = file.getLong("banTime");
 	long timetounban = time - System.currentTimeMillis();
 	long seconds = timetounban / 1000;
 
-	if (timetounban < 0) {
-	    SavedDataManager.unban(offlinePlayer);
-	    return;
-	}
-
 	long s = seconds % 60;
 	long m = (seconds / 60) % 60;
 	long h = (seconds / (60 * 60)) % 24;
+
+	if (System.currentTimeMillis() > executeTime) {
+	    e.disallow(Result.KICK_BANNED, "§cYou are banned for " + reason + " and will be unbanned in " + h + ":" + m + ":" + s);
+	    BanUtils.ban(Bukkit.getConsoleSender(), offlinePlayer, reason, time, 0);
+	}
+
+	if (timetounban < 0) {
+	    BanUtils.unban(offlinePlayer);
+	    return;
+	}
 
 	e.disallow(Result.KICK_BANNED, "§cYou are banned for " + reason + " and will be unbanned in " + h + ":" + m + ":" + s);
 	return;

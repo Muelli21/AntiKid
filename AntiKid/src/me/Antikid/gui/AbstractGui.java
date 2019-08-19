@@ -8,9 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import me.Antikid.main.Main;
-import me.Antikid.types.ItemBuilder;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
 
 public abstract class AbstractGui {
 
@@ -31,7 +30,7 @@ public abstract class AbstractGui {
 	this.closeable = closeable;
 	this.inventory = inventory;
 
-	PlayerData pd = Main.getPlayerData(player);
+	PlayerData pd = PlayerData.getPlayerData(player);
 
 	if (pd.getCurrentGui() != null) {
 	    setLastGui(pd.getCurrentGui());
@@ -121,7 +120,7 @@ public abstract class AbstractGui {
     }
 
     public static void closeCurrentGui(Player player) {
-	PlayerData pd = Main.getPlayerData(player);
+	PlayerData pd = PlayerData.getPlayerData(player);
 	AbstractGui gui = pd.getCurrentGui();
 
 	if (gui != null) {
@@ -132,7 +131,7 @@ public abstract class AbstractGui {
     public void close() {
 
 	if (player == null || !player.isOnline()) { return; }
-	PlayerData pd = Main.getPlayerData(player);
+	PlayerData pd = PlayerData.getPlayerData(player);
 
 	if (isCloseable()) {
 	    if (pd.getCurrentGui() == this) {
@@ -151,7 +150,7 @@ public abstract class AbstractGui {
 
     public void openInventory() {
 
-	PlayerData pd = Main.getPlayerData(player);
+	PlayerData pd = PlayerData.getPlayerData(player);
 	AbstractGui currentGui = pd.getCurrentGui();
 
 	if (currentGui != null) {

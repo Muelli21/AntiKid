@@ -9,16 +9,16 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.potion.PotionType;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
-import me.Antikid.types.ItemBuilder;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.PlayerData;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
 
 public class Heal extends Module implements Listener {
 
     public Heal() {
-	super("Heal", new ItemBuilder.PotionBuilder(PotionType.REGEN, 1).build().build());
+	super("Heal", new ItemBuilder.PotionBuilder(PotionType.REGEN, 1).build().build(), 1, 3, 5, false, BanReason.HEAL);
     }
 
     @EventHandler
@@ -26,16 +26,16 @@ public class Heal extends Module implements Listener {
 
 	if (!(e.getEntity() instanceof Player)) { return; }
 
-	Player p = (Player) e.getEntity();
-	PlayerData pd = Main.getPlayerData(p);
+	Player player = (Player) e.getEntity();
+	PlayerData pd = PlayerData.getPlayerData(player);
 
-	if (!isEnabled() || !MoveListener.checkAble(p)) { return; }
+	if (!isEnabled() || !PlayerUtils.checkAble(player)) { return; }
 
 	if (e.getRegainReason() == RegainReason.SATIATED) {
 
 	    if (System.currentTimeMillis() - pd.getHealtime() < 3500) {
-		pd.setHeal(pd.getHeal() + 1);
-		debug(p, Arrays.asList("unlegit heal"));
+		addViolation(player);
+		debug(player, Arrays.asList("unlegit heal"));
 	    }
 
 	    pd.setHealtime(System.currentTimeMillis());

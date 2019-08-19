@@ -1,4 +1,4 @@
-package me.Antikid.types;
+package me.Antikid.utils;
 
 import java.util.List;
 import java.util.Map;

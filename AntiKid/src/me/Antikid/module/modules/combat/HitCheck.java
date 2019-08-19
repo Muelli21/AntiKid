@@ -9,19 +9,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import me.Antikid.listener.MoveListener;
-import me.Antikid.main.Main;
 import me.Antikid.module.Module;
+import me.Antikid.types.BanReason;
 import me.Antikid.types.ClickActions;
-import me.Antikid.types.ItemBuilder;
 import me.Antikid.types.PlayerData;
 import me.Antikid.types.Roast;
-import me.Antikid.types.Utils;
+import me.Antikid.utils.ItemBuilder;
+import me.Antikid.utils.PlayerUtils;
+import me.Antikid.utils.ServerUtils;
+import me.Antikid.utils.Utils;
 
 public class HitCheck extends Module implements Listener {
 
     public HitCheck() {
-	super("Hitcheck", new ItemBuilder(Material.GOLD_SWORD).build());
+	super("Hitcheck", new ItemBuilder(Material.GOLD_SWORD).build(), 1, 3, 5, true, BanReason.OTHER);
     }
 
     @EventHandler
@@ -30,7 +31,7 @@ public class HitCheck extends Module implements Listener {
 	if (!(e.getDamager() instanceof Player)) { return; }
 
 	Player p = (Player) e.getDamager();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Material material = p.getItemInHand().getType();
 
 	pd.getHits().addHit();
@@ -43,7 +44,7 @@ public class HitCheck extends Module implements Listener {
 	    pd.getHits().addSneakHit();
 	}
 
-	if (isEnabled() && MoveListener.checkAble(p)) {
+	if (isEnabled() && PlayerUtils.checkAble(p)) {
 	    checkHits(p);
 	}
     }
@@ -52,7 +53,7 @@ public class HitCheck extends Module implements Listener {
     public void onHit(PlayerInteractEvent e) {
 
 	Player p = e.getPlayer();
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Material material = p.getItemInHand().getType();
 
 	pd.getHits().addInteract();
@@ -64,7 +65,7 @@ public class HitCheck extends Module implements Listener {
 
     public void checkHits(Player p) {
 
-	PlayerData pd = Main.getPlayerData(p);
+	PlayerData pd = PlayerData.getPlayerData(p);
 	Roast roast = pd.getRoast();
 	ClickActions hits = pd.getHits();
 
@@ -81,7 +82,7 @@ public class HitCheck extends Module implements Listener {
 		if (blockHitPercentage >= 90 && blockInteractPercentage <= 10) {
 		    hits.setLastCheck(System.currentTimeMillis());
 		    roast.addRoast();
-		    Main.alert(pd.getPlayer(), "administration", "blockhit to hit percentage", blockHitPercentage);
+		    ServerUtils.alert(pd.getPlayer(), "administration", "blockhit to hit percentage", blockHitPercentage);
 		}
 	    }
 
@@ -91,7 +92,7 @@ public class HitCheck extends Module implements Listener {
 		if (sneakHitPercentage >= 90) {
 		    hits.setLastCheck(System.currentTimeMillis());
 		    roast.addRoast();
-		    Main.alert(pd.getPlayer(), "administration", "sneakHit to hit percentage", sneakHitPercentage);
+		    ServerUtils.alert(pd.getPlayer(), "administration", "sneakHit to hit percentage", sneakHitPercentage);
 		}
 	    }
 	}

@@ -1,10 +1,20 @@
 package me.Antikid.types;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import me.Antikid.utils.BanUtils;
+
 public class Roast {
 
+    private Player player;
     private int roasts;
     private int roastsExperimental;
     private long lastRoast;
+
+    public Roast(Player player) {
+	this.player = player;
+    }
 
     public int getRoasts() {
 	return roasts;
@@ -66,6 +76,7 @@ public class Roast {
     }
 
     public void handleRoasts() {
+	PlayerData pd = PlayerData.getPlayerData(player);
 	long time = 5 * 60 * 1000;
 
 	if (System.currentTimeMillis() - lastRoast > time) {
@@ -76,6 +87,12 @@ public class Roast {
 	if (System.currentTimeMillis() - lastRoast > time / 2) {
 	    if (roastsExperimental > 0)
 		roastsExperimental--;
+	}
+
+	if (getRoasts() >= 5 || getRoasts() + (getRoastsExperimental() / 2) >= 5 || getRoastsExperimental() >= 10) {
+	    BanUtils.ban(Bukkit.getConsoleSender(), pd.getPlayer(), BanReason.UNFAIRADVANTAGE);
+	    resetRoast();
+	    resetRoastExperimental();
 	}
     }
 }
